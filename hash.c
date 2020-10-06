@@ -55,3 +55,74 @@ static uint32_t SuperFastHash (const char *data,int len,uint32_t tablesize) {
   return hash % tablesize;
 }
 
+//array of queues
+typedef struct hash_t{
+	int size;     //size of table
+	queue_t** array;   //pointer to an array that contains pointers to queues
+}hash_t
+
+hashtable_t *hopen(uint32_t hsize){
+	hash_t* ht;
+
+	ht = (hash_t*)malloc(sizeof(hash_t));
+	if ( ht == NULL ){
+		printf("memory allocation failed or hsize is zero");
+	}
+
+	ht->array = (queue_t*)malloc(hsize * sizeof(queue_t*));
+	if ( ht->array == NULL ){
+		printf("memory allocation failed for queue");
+	}
+	
+	ht->size = hsize;
+	for (int i = 0; i<hsize, i++){
+		ht->array[i] = qopen();
+	}
+	
+	return (hashtable_t*)ht;
+}
+
+void hclose(hashtable_t *htp){
+	hash_t* ht = (hash_t*)htp
+	for (int i = 0; i < ht->size; i++){
+		qclose(ht->array[i]);
+	}
+	free(ht->array);
+	free(ht);	
+}
+
+int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen){
+	hash_t* ht = (hash_t*)htp;
+	uint32_t index = SuperFastHash(key,keylen,ht->size);
+
+	if (qput(ht->array[index],ep)== 0){
+		return 0;
+	}else{
+		return 1;
+	}
+	
+}
+
+void happly(hashtable_t *htp, void (*fn)(void* ep)){
+	hash_t* ht = (hash_t*)htp;
+	for (int i=0; i<ht->size; i++){
+		qapply(ht->array[i],fn);
+}
+
+void *hsearch(hashtable_t *htp, bool (*searchfn)(void* elementp, const void* searchkeyp),
+							const char *key,
+							int32_t keylen){
+	hash_t* ht = (hash_t*)htp;
+ 	uint32_t index = SuperFastHash(key,keylen,ht->size);
+	void* result = qsearch(ht->array[index],searchfn,(void*)key);
+	return result;
+}
+
+void *hremove(hashtable_t *htp,
+							bool (*searchfn)(void* elementp, const void* searchkeyp),
+							const char *key,
+							int32_t keylen){
+	hash_t* ht = (hash_t*)htp;
+	uint32_t index = SuperFastHash(key,keylen,ht->size);
+	void* result = qremove(ht->array[index],searchfn,(void*)key);
+}
