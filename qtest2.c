@@ -16,7 +16,9 @@
 #include "list.h"
 #include "queue.h"
 
-void print(car_t *cp) {
+void print(void *p) {
+	car_t *cp = (car_t *)p;
+	
 	if (cp != NULL) {
 		printf("%s\n", cp->plate);
 	} else {
@@ -24,7 +26,9 @@ void print(car_t *cp) {
 	}
 }
 
-void yearup(car_t *cp) {
+void yearup(void *p) {
+	car_t *cp = (car_t *)p;
+	
 	if (cp != NULL) {
 		printf("old year: %d\n", cp->year);
 		cp->year = cp->year + 1;
@@ -35,7 +39,8 @@ void yearup(car_t *cp) {
 }
 
 bool search(void *elp, const void *keyp) {
-	if (strcmp(elp->plate, (char *)keyp) == 0 || elp->price == *(double *)keyp || elp->year == *(int *)keyp) {
+	car_t *cp = (car_t *)elp;
+	if (strcmp(cp->plate, (char *)keyp) == 0 || cp->price == *(double *)keyp || cp->year == *(int *)keyp) {
 		return true;
 	}
 	return false;
@@ -46,7 +51,11 @@ int main(void) {
 	int32_t pr1, pr2, pr3, pr4;
 	queue_t *a, *b;
 	car_t *cr_1, *cr_2, *cr_3, *cr_4, *cr_a, *cr_b, *cr_c, *cr_d;
-	int const *yp1 = 2013, *yp2 = 2001;
+	int y1 = 2013, y2 = 2001;
+	const void *yp1, *yp2;
+
+	yp1 = &y1;
+	yp2 = &y2;
 	
 	//allocate memory for elements (cars)
 	cr_1 = (car_t *)malloc(sizeof(car_t));
@@ -89,22 +98,26 @@ int main(void) {
 	pr4 = qput(a, (void *)cr_4);
 	if (pr1 != 0 || pr2 != 0 || pr3 != 0 || pr4 != 0) {
 		fail = true;
+		printf("\nFAIL: test qput: successful return (0) for empty and non-empty list\n");
 	}
 	
 	//test qapply: function was applied to each element
 	qapply(a, yearup);
 	if (cr_1->year != 2013 || cr_2->year != 2011 || cr_3->year != 2011 || cr_4->year != 2008) {
 		fail = true;
+		printf("\nFAIL: test qapply: function was applied to each element\n");
 	}
 	
 	//test qget: first one in, first one out
-	if ((car_t *)qget() != cr_1) {
+	if ((car_t *)qget(a) != cr_1) {
 		fail = true;
+		printf("\nFAIL: test qget: first one in, first one out\n");
 	}
 	
 	//test qget: removes element from queue
-	if ((car_t *)qget() != cr_2) {
+	if ((car_t *)qget(a) != cr_2) {
 		fail = true;
+		printf("\nFAIL: test qget: removes element from queue\n");
 	}
 	
 	//test qput: successful return (0) for re-entry
@@ -112,24 +125,28 @@ int main(void) {
 	pr2 = qput(a, (void *)cr_2);
 	if (pr1 != 0 || pr2 !=0) {
 		fail = true;
+		printf("\nFAIL: test qput: successful return (0) for re-entry\n");
 	}
 	
 	//the queue is now in the following order: cr_3 (front), cr_4, cr_1, cr_2 (back)
 	qapply(a, print);
 	
 	//test qsearch: successful return (pointer to element) when skeyp is in queue
-	if ((car_t *)qsearch(a, search, yp1) != car_1) {
+	if ((car_t *)qsearch(a, search, yp1) != cr_1) {
 		fail = true;
+		printf("\nFAIL: test qsearch: successful return (pointer to element) when skeyp is in queue\n");
 	}
 	
 	//test qsearch: successful return (NULL) when skeyp is not in queue
 	if (qsearch(a, search, yp2) != NULL) {
 		fail = true;
+		printf("\nFAIL: test qsearch: successful return (NULL) when skeyp is not in queue\n");
 	}
 	
 	//test qremove: successful return (pointer to element) when skeyp is in queue
-	if (*(car_t *)qremove(a, search, yp1) != *car_1) {
+	if ((car_t *)qremove(a, search, yp1) != cr_1) {
 		fail = true;
+		printf("\nFAIL: test qremove: successful return (pointer to element) when skeyp is in queue\n");
 	}
 
 	//the queue is now in the following order: cr_3 (front), cr_4, cr_2 (back)
@@ -141,6 +158,7 @@ int main(void) {
 	cr_b = (car_t *)qget(a);
 	if (cr_b != cr_2) {
 		fail = true;
+		printf("\nFAIL: test qremove: removes element when element is found\n");
 	}
 
 	//the queue is now empty
@@ -158,6 +176,7 @@ int main(void) {
 	//test qremove: successful return (NULL) when skeyp is not in queue
 	if (qsearch(a, search, yp2) != NULL) {
 		fail = true;
+		printf("\nFAIL: test qremove: successful return (NULL) when skeyp is not in queue\n");
 	}
 	
 	//test qremove: does not remove any elements when element is not found
@@ -167,6 +186,7 @@ int main(void) {
 	cr_d = qget(a);
 	if (cr_a != cr_1 || cr_b != cr_2 || cr_c != cr_3 || cr_d != cr_4) {
 		fail = true;
+		printf("\nFAIL: test qremove: does not remove any elements when element is not found\n");
 	}
 
 	//the queue is now empty
@@ -193,6 +213,7 @@ int main(void) {
 	cr_d = qget(a);
 	if (cr_a != cr_1 || cr_b != cr_2 || cr_c != cr_3 || cr_d != cr_4 || qget(b) != NULL) {
 		fail = true;
+		printf("\nFAIL: test qconcat: adds to q1 & deletes q2 when neither are empty\n");
 	}
 
 	qput(a, cr_1);
@@ -201,8 +222,9 @@ int main(void) {
 
 	//test qclose: closes queue
 	qclose(a);
-	if (qget(a) != NULL) {
+	if (a != NULL) {
 		fail = true;
+		printf("\nFAIL: test qclose: closes queue\n");
 	}
 
 	//deallocate memory

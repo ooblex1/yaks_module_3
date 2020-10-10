@@ -3,6 +3,7 @@
  *
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "queue.h"
@@ -30,17 +31,17 @@ queue_t* qopen(void) {
 }
 
 void qclose(queue_t *qp) {
-	pivot_t *temp, *ip;
+	pivot_t *temp1, *temp2, *ip;
 	guide_t *gp = (guide_t *)qp;
 	
 	if (gp != NULL && gp->front != NULL) {
-		for (ip = gp->front; ip != NULL) {
+		for (ip = gp->front; ip != NULL; ip = temp2) {
 			if (ip->e != NULL) {
 				free(ip->e);
 			}
-			temp = ip;
-			ip = ip->next;
-			free(temp);
+			temp1 = ip;
+			temp2 = ip->next;
+			free(temp1);
 		}
 	}
 	
@@ -159,7 +160,7 @@ void* qremove(queue_t *qp,
 				nf = 0;
 			}
 		} else {
-			for (p = q->front; p->next != NULL, xx != 1; p = p->next) {
+			for (p = q->front; p->next != NULL && xx != 1; p = p->next) {
 				if (p == q->front && searchfn(p->e, skeyp)) {
 					q->front = q->front->next;
 					temp = p->e;
