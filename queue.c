@@ -40,8 +40,10 @@ void qclose(queue_t *qp) {
 				free(ip->e);
 				ip->e = NULL;
 			}
+			
 			temp1 = ip;
 			temp2 = ip->next;
+			
 			free(temp1);
 			temp1 = NULL;
 		}
@@ -66,6 +68,7 @@ int32_t qput(queue_t *qp, void *ep) {
 			result = 1;
 		} else {
 			p->e = ep;
+			p->next = NULL;
 			
 			if (q->front == NULL) {
 				q->front = p;
@@ -102,6 +105,7 @@ void* qget(queue_t *qp) {
 	}
 
 	free(p);
+	p = NULL;
 	return temp;
 }
 
@@ -217,13 +221,10 @@ void qconcat(queue_t *qp1, queue_t *qp2) {
 		if (q2 == NULL || q2->front == NULL || q2->back == NULL) {
 			printf("Queue to be added is empty.\n");
 		} else {
-			printf("-entered else 2-");
 			if (q1->front == NULL) {
-				printf("-qconcat thinks q1->front == NULL-");
 				q1->front = q2->front;
 				q1->back = q2->back;
 			} else {
-				printf("-qconcat thinks q1->front != NULL-");
 				q1->back->next = q2->front;
 				q1->back = q2->back;
 			}

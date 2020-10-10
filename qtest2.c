@@ -53,7 +53,7 @@ int main(void) {
 	car_t *cr_1, *cr_2, *cr_3, *cr_4, *cr_a, *cr_b, *cr_c, *cr_d, *cp;
 	int y1 = 2013, y2 = 2001;
 	const void *yp1, *yp2;
-
+	
 	yp1 = &y1;
 	yp2 = &y2;
 	
@@ -125,6 +125,7 @@ int main(void) {
 	}
 	
 	//the queue is now in the following order: cr_3 (front), cr_4, cr_1, cr_2 (back)
+	printf("Queue should now be in the order 3,4,1,2, so the following message should read \"caz don amy bob\":\n");
 	qapply(a, print);
 	
 	//test qsearch: successful return (pointer to element) when skeyp is in queue
@@ -145,8 +146,9 @@ int main(void) {
 		fail = true;
 		printf("\nFAIL: test qremove: successful return (pointer to element) when skeyp is in queue\n");
 	}
-
+	
 	//the queue is now in the following order: cr_3 (front), cr_4, cr_2 (back)
+	printf("Queue should now be in the order 3,4,2, so the following message should read \"caz don bob\":\n");
 	qapply(a, print);
 	
 	//test qremove: removes element when element is found
@@ -159,15 +161,17 @@ int main(void) {
 	}
 
 	//the queue is now empty
+	printf("Queue should now be empty, so an approporiate message should follow:\n");
 	qapply(a, print);
-
+	
 	//re-fill queue
 	qput(a, cr_1);
 	qput(a, cr_2);
 	qput(a, cr_3);
 	qput(a, cr_4);
-
+	
 	//the queue is now in the following order: cr_1 (front), cr_2, cr_3, cr_4 (back)
+	printf("Queue should now be in the order 1,2,3,4, so the following message should read \"amy bob caz don\":\n");
 	qapply(a, print);
 	
 	//test qremove: successful return (NULL) when skeyp is not in queue
@@ -185,25 +189,34 @@ int main(void) {
 		fail = true;
 		printf("\nFAIL: test qremove: does not remove any elements when element is not found\n");
 	}
-
+	
 	//the queue is now empty
+	printf("Queue should now be empty, so an approporiate message should follow:\n");
 	qapply(a, print);
-
+	
 	//make two queues
-	qput(a, cr_1);
-	qput(a, cr_2);
+	qput(a, (void *)cr_1);
+	qput(a, (void *)cr_2);
 	b = qopen();
-	qput(b, cr_3);
-	qput(b, cr_4);
-
+	qput(b, (void *)cr_3);
+	qput(b, (void *)cr_4);
+	
 	//the queues are now in the following orders: a: cr_1 (front), cr_2 (back); b: cr_3 (front), cr_4 (back)
-	printf("\nQueue a 1:\n");
+	printf("\nQueue a, right before qconcat is called:\n");
 	qapply(a, print);
-	printf("\nQueue b 1:\n");
+	printf("\nQueue b, right before qconcat is called:\n");
 	qapply(b, print);
 	
-	//test qconcat: adds to q1 & deletes q2 when neither are empty
+	//call qconcat
 	qconcat(a, b);
+
+	//the queues are now in the following orders: a: cr_1 (front), cr_2, cr_3, cr_4 (back); b: empty
+	printf("\nQueue a, right after qconcat is called:\n");
+	qapply(a, print);
+	printf("\nQueue b, right after qconcat is called:\n");
+	qapply(b, print);
+	
+	//test qconcat: successfully adds to q1 & deletes q2 when neither are empty
 	cr_a = qget(a);
 	cr_b = qget(a);
 	cr_c = qget(a);
@@ -212,11 +225,6 @@ int main(void) {
 		fail = true;
 		printf("\nFAIL: test qconcat: adds to q1 & deletes q2 when neither are empty\n");
 	}
-
-	printf("\nQueue a 2:\n");
-	qapply(a, print);
-	printf("\nQueue b 2:\n");
-	qapply(b, print);
 	
 	//deallocate memory
 	qclose(a);

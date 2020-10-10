@@ -59,8 +59,8 @@ bool search(void *elp, const void *keyp) {
 int main(void) {
 	bool fail = false;
 	queue_t *a, *b;
-	guide_t *q;
-	pivot_t *qf, *qb;
+	guide_t *q1, *q2;
+	pivot_t *qf1, *qb1, *qf2, *qb2;
 	car_t *cr_1;
 	int y = 2013;
 	const void *yp;
@@ -78,8 +78,8 @@ int main(void) {
 	
 	//test qapply: function was not applied to empty queue
 	qapply(a, yearup);
-	q = (guide_t *)a;
-	if (q->front != NULL || q->back != NULL) {
+	q1 = (guide_t *)a;
+	if (q1->front != NULL || q1->back != NULL) {
 		fail = true;
 		printf("\nFAIL: test qapply: function was not applied to empty queue\n");
 	}
@@ -112,8 +112,8 @@ int main(void) {
 	
 	//test qconcat: does nothing when queue to be added is empty
 	qconcat(a, b);
-	q = (guide_t *)a;
-	if (q->front != NULL || q->back != NULL) {
+	q1 = (guide_t *)a;
+	if (q1->front != NULL || q1->back != NULL) {
 		fail = true;
 		printf("\nFAIL: test qconcat: does nothing when queue to be added is empty\n");
 	}
@@ -132,11 +132,14 @@ int main(void) {
 	qapply(b, print);
 	
 	//test qconcat: successfully adds to empty queue
+	q1 = (guide_t *)b;
+	qf1 = q1->front;
+	qb1 = q1->back;
 	qconcat(a, b);
-	q = (guide_t *)a;
-	qf = q->front;
-	qb = q->back;
-	if ((car_t *)qf != cr_1 || (car_t *)qb != cr_1) {
+	q2 = (guide_t *)a;
+	qf2 = q2->front;
+	qb2 = q2->back;
+	if (qf1 != qf2 || qb1 != qb2) {
 		fail = true;
 		printf("\nFAIL: test qconcat: successfully adds to empty queue\n");
 	}
