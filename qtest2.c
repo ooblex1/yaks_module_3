@@ -50,7 +50,7 @@ int main(void) {
 	bool fail = false;
 	int32_t pr1, pr2, pr3, pr4;
 	queue_t *a, *b;
-	car_t *cr_1, *cr_2, *cr_3, *cr_4, *cr_a, *cr_b, *cr_c, *cr_d;
+	car_t *cr_1, *cr_2, *cr_3, *cr_4, *cr_a, *cr_b, *cr_c, *cr_d, *cp;
 	int y1 = 2013, y2 = 2001;
 	const void *yp1, *yp2;
 
@@ -62,10 +62,6 @@ int main(void) {
 	cr_2 = (car_t *)malloc(sizeof(car_t));
 	cr_3 = (car_t *)malloc(sizeof(car_t));
 	cr_4 = (car_t *)malloc(sizeof(car_t));
-	cr_a = (car_t *)malloc(sizeof(car_t));
-	cr_b = (car_t *)malloc(sizeof(car_t));
-	cr_c = (car_t *)malloc(sizeof(car_t));
-	cr_d = (car_t *)malloc(sizeof(car_t));
 	
 	//initialize elements (cars)
 	strcpy(cr_1->plate, "amy");
@@ -144,7 +140,8 @@ int main(void) {
 	}
 	
 	//test qremove: successful return (pointer to element) when skeyp is in queue
-	if ((car_t *)qremove(a, search, yp1) != cr_1) {
+	cp = (car_t *)qremove(a, search, yp1);
+	if (cp != cr_1) {
 		fail = true;
 		printf("\nFAIL: test qremove: successful return (pointer to element) when skeyp is in queue\n");
 	}
@@ -200,9 +197,9 @@ int main(void) {
 	qput(b, cr_4);
 
 	//the queues are now in the following orders: a: cr_1 (front), cr_2 (back); b: cr_3 (front), cr_4 (back)
-	printf("\nQueue a:\n");
+	printf("\nQueue a 1:\n");
 	qapply(a, print);
-	printf("\nQueue b:\n");
+	printf("\nQueue b 1:\n");
 	qapply(b, print);
 	
 	//test qconcat: adds to q1 & deletes q2 when neither are empty
@@ -216,46 +213,19 @@ int main(void) {
 		printf("\nFAIL: test qconcat: adds to q1 & deletes q2 when neither are empty\n");
 	}
 
-	qput(a, cr_1);
-	qput(a, cr_2);
-	qput(a, cr_3);
-
-	//test qclose: closes queue
-	qclose(a);
-	if (a != NULL) {
-		fail = true;
-		printf("\nFAIL: test qclose: closes queue\n");
-	}
-
+	printf("\nQueue a 2:\n");
+	qapply(a, print);
+	printf("\nQueue b 2:\n");
+	qapply(b, print);
+	
 	//deallocate memory
-	if (b != NULL) {
-		qclose(b);
-	}
-	if (cr_1 != NULL) {
-		free(cr_1);
-	}
-	if (cr_2 != NULL) {
-		free(cr_2);
-	}
-	if (cr_3 != NULL) {
-		free(cr_3);
-	}
-	if (cr_4 != NULL) {
-		free(cr_4);
-	}
-	if (cr_a != NULL) {
-		free(cr_a);
-	}
-	if (cr_b != NULL) {
-		free(cr_b);
-	}
-	if (cr_c != NULL) {
-		free(cr_c);
-	}
-	if (cr_d != NULL) {
-		free(cr_d);
-	}
-
+	qclose(a);
+	qclose(b);
+	free(cr_1);
+	free(cr_2);
+	free(cr_3);
+	free(cr_4);
+	
 	//exit with appropriate exit status
 	if (fail) {
 		exit(EXIT_FAILURE);

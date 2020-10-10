@@ -38,14 +38,17 @@ void qclose(queue_t *qp) {
 		for (ip = gp->front; ip != NULL; ip = temp2) {
 			if (ip->e != NULL) {
 				free(ip->e);
+				ip->e = NULL;
 			}
 			temp1 = ip;
 			temp2 = ip->next;
 			free(temp1);
+			temp1 = NULL;
 		}
 	}
 	
 	free(qp);
+	qp = NULL;
 }
 
 int32_t qput(queue_t *qp, void *ep) {
@@ -58,20 +61,25 @@ int32_t qput(queue_t *qp, void *ep) {
 		printf("memory allocation failed");
 		result = 1;
 	} else {
-		p->e = ep;
-		
-		if (q->front == NULL) {
-			q->front = p;
-		} else {
-			q->back->next = p;
-		}
-		q->back = p;
-		
-		if (q->back != p) {
+		if (ep == NULL) {
+			printf("passed element is NULL");
 			result = 1;
+		} else {
+			p->e = ep;
+			
+			if (q->front == NULL) {
+				q->front = p;
+			} else {
+				q->back->next = p;
+			}
+			q->back = p;
+			
+			if (q->back != p) {
+				result = 1;
+			}
 		}
 	}
-
+	
 	return result;
 }
 
@@ -84,7 +92,8 @@ void* qget(queue_t *qp) {
 	}
 	
 	void *temp = q->front->e;
-
+	pivot_t *p = q->front;
+	
 	if (q->front == q->back) {
 		q->front = NULL;
 		q->back = NULL;
@@ -92,8 +101,7 @@ void* qget(queue_t *qp) {
 		q->front = q->front->next;
 	}
 
-	//should I free the pivot?
-	
+	free(p);
 	return temp;
 }
 
@@ -109,13 +117,9 @@ void qapply(queue_t *qp, void (*fn)(void *ep)) {
 	} else {
 		pivot_t *p;
 		
-		//printf("\n********\nApplying function to every element in queue...\n");
-		
 		for (p = q->front; p != NULL; p = p->next) {
 			fn(p->e);
 		}
-		
-		//printf("...done.\n********\n");
 	}
 }
 
@@ -143,34 +147,40 @@ void* qremove(queue_t *qp,
 							bool (*searchfn)(void *ep, const void *keyp),
 							const void *skeyp) {
 	guide_t *q = (guide_t *)qp;
-	pivot_t *p;
-	void *temp;
+	pivot_t *p, *temp1 = NULL;
+	void *temp2;
 	int xx = 0, nf = 1;
 	
 	if (q == NULL || q->front == NULL || q->back == NULL) {
 		printf("Queue is empty.\n");
-		temp = NULL;
+		temp2 = NULL;
 		nf = 0;
 	} else {
 		if (q->front == q->back) {
 			if (searchfn(q->front->e, skeyp)) {
-				temp = q->front->e;
+				temp1 = q->front;
+				temp2 = q->front->e;
+				
 				q->front = NULL;
 				q->back = NULL;
+				
 				nf = 0;
 			}
 		} else {
 			for (p = q->front; p->next != NULL && xx != 1; p = p->next) {
 				if (p == q->front && searchfn(p->e, skeyp)) {
+					temp1 = p;
+					temp2 = p->e;
+					
 					q->front = q->front->next;
-					temp = p->e;
-
+					
 					nf = 0;
 					xx = 1;
 				}
 				
 				if (searchfn(p->next->e, skeyp)) {
-					temp = p->next->e;
+					temp1 = p->next;
+					temp2 = p->next->e;
 					
 					if (p->next == q->back) {
 						p->next = NULL;
@@ -188,25 +198,38 @@ void* qremove(queue_t *qp,
 	
 	if (nf == 1) {
 		printf("Element not found in queue.\n");
-		temp = NULL;
+		temp2 = NULL;
 	}
 
-	return temp;
+	if (temp1 != NULL) {
+		free(temp1);
+	}
+
+	return temp2;
 }
 
 void qconcat(queue_t *qp1, queue_t *qp2) {
 	guide_t *q1 = (guide_t *)qp1, *q2 = (guide_t *)qp2;
-
-	if (q2->front == NULL || q2->back == NULL) {
-		printf("Queue to be added is empty.\n");
+	
+	if (q1 == NULL) {
+		printf("Queue to be added to does not exist.\n");
 	} else {
-		if (q1->front == NULL) {
-			q1->front = q2->front;
+		if (q2 == NULL || q2->front == NULL || q2->back == NULL) {
+			printf("Queue to be added is empty.\n");
 		} else {
-			q1->back->next = q2->front;
+			printf("-entered else 2-");
+			if (q1->front == NULL) {
+				printf("-qconcat thinks q1->front == NULL-");
+				q1->front = q2->front;
+				q1->back = q2->back;
+			} else {
+				printf("-qconcat thinks q1->front != NULL-");
+				q1->back->next = q2->front;
+				q1->back = q2->back;
+			}
+			
+			free(q2);
+			q2 = NULL;
 		}
-		q1->back = q2->back;
 	}
-
-	free(qp2);
 }
