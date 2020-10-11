@@ -160,7 +160,7 @@ int main(void) {
   }
 
 	//test hclose
-  printf("testing hclose for a null pointer\n");
+  printf("--Testing hclose for a null pointer\n");
   hclose(ht_empty);
 
 

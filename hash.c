@@ -82,7 +82,7 @@ hashtable_t *hopen(uint32_t hsize){
 		printf("memory allocation failed or hsize is zeron\n");
 	}
 
-	ht->array = (queue_t**)malloc(hsize * sizeof(queue_t*));
+	ht->array = malloc(hsize * sizeof(queue_t*));
 	if ( ht->array == NULL ){
 		printf("memory allocation failed for queue\n");
 	}
@@ -101,7 +101,7 @@ void hclose(hashtable_t *htp){
 		printf("hashtable does not exist\n");
 	}else{
 		for (int i = 0; i < ht->size; i++){
-		qclose(ht->array[i]);
+			qclose(ht->array[i]);
 		}
 		free(ht->array);
 		free(ht);	
@@ -114,15 +114,16 @@ int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen){
 	if (ht == NULL){
 		printf("hashtable does not exist\n");
 		return 1;
-	}else{
-		uint32_t index = SuperFastHash(key,keylen,ht->size);
-
-		if (qput(ht->array[index],ep)== 0){
-			return 0;
-		}else{
-			return 1;
-		}
 	}
+
+	uint32_t index = SuperFastHash(key,keylen,ht->size);
+
+	if (qput(ht->array[index],ep)== 0){
+			return 0;
+	}else{
+			return 1;
+	}
+	
 }
 
 void happly(hashtable_t *htp, void (*fn)(void* ep)){
@@ -177,7 +178,7 @@ void *hremove(hashtable_t *htp,
 
 	//printf("%p\n", (void *) ht->array[index]);
 
-	void* result = qremove(ht->array[index],searchfn,(void*)key);
+	void* result = qremove(ht->array[index],searchfn,key);
 	return result;
 	
 }
