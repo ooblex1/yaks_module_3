@@ -22,6 +22,8 @@ queue_t* qopen(void) {
 	guide_t *q;
 	
 	q = (guide_t *)malloc(sizeof(guide_t));
+	q->front = NULL;
+	q->back = NULL;
 	if (q == NULL) {
 		printf("memory allocation failed");
 		return NULL;
@@ -116,7 +118,7 @@ void qapply(queue_t *qp, void (*fn)(void *ep)) {
 		printf("Error: Invalid function.\n");
 	}
 	
-	if (q == NULL || q->front == NULL || q->back == NULL) {
+	if (q == NULL) {
 		printf("Queue is empty, cannot apply function.\n");
 	} else {
 		pivot_t *p;

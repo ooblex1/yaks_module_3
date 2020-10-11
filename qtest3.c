@@ -146,12 +146,10 @@ int main(void) {
 
 	printf("\nQueue a 4:\n");
 	qapply(a, print);
-	printf("\nQueue b 4:\n");
-	qapply(b, print);
+	printf("\nQueue b 4 was deallocated, so trying to print it would result in a valgrind error.\n");
 	
 	//deallocate memory
 	qclose(a);
-	free(cr_1);
 	
 	//exit with appropriate exit status
 	if (fail) {

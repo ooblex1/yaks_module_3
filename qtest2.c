@@ -213,22 +213,20 @@ int main(void) {
 	//the queues are now in the following orders: a: cr_1 (front), cr_2, cr_3, cr_4 (back); b: empty
 	printf("\nQueue a, right after qconcat is called:\n");
 	qapply(a, print);
-	printf("\nQueue b, right after qconcat is called:\n");
-	qapply(b, print);
+	printf("\nTrying to print queue b would result in a valgrind error, since it was deallocated by qconcat.\n");
 	
 	//test qconcat: successfully adds to q1 & deletes q2 when neither are empty
 	cr_a = qget(a);
 	cr_b = qget(a);
 	cr_c = qget(a);
 	cr_d = qget(a);
-	if (cr_a != cr_1 || cr_b != cr_2 || cr_c != cr_3 || cr_d != cr_4 || qget(b) != NULL) {
+	if (cr_a != cr_1 || cr_b != cr_2 || cr_c != cr_3 || cr_d != cr_4) {
 		fail = true;
 		printf("\nFAIL: test qconcat: adds to q1 & deletes q2 when neither are empty\n");
 	}
 	
 	//deallocate memory
 	qclose(a);
-	qclose(b);
 	free(cr_1);
 	free(cr_2);
 	free(cr_3);
