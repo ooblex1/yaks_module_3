@@ -24,6 +24,7 @@ queue_t* qopen(void) {
 	q = (guide_t *)malloc(sizeof(guide_t));
 	q->front = NULL;
 	q->back = NULL;
+
 	if (q == NULL) {
 		printf("memory allocation failed");
 		return NULL;
@@ -152,51 +153,57 @@ void* qsearch(queue_t *qp, bool (*searchfn)(void *ep, const void *keyp),
 void* qremove(queue_t *qp,
 							bool (*searchfn)(void *ep, const void *keyp),
 							const void *skeyp) {
-	guide_t *q = (guide_t *)qp;
-	pivot_t *p, *temp1 = NULL;
-	void *temp2;
-	int xx = 0, nf = 1;
+	pivot_t *p = NULL, *temp1 = NULL;
+	void *temp2 = NULL;
+	int xx = 0, yy = 0, nf = 1;
 	
-	if (q == NULL || q->front == NULL || q->back == NULL) {
+	if (qp == NULL) {
 		printf("Queue is empty.\n");
 		temp2 = NULL;
 		nf = 0;
 	} else {
-		if (q->front == q->back) {
-			if (searchfn(q->front->e, skeyp)) {
-				temp1 = q->front;
-				temp2 = q->front->e;
-				
-				q->front = NULL;
-				q->back = NULL;
-				
-				nf = 0;
-			}
+		guide_t *q = (guide_t *)qp;
+		
+		if (q == NULL || q->front == NULL || q->back == NULL) {
+			printf("Queue is empty.\n");
+			temp2 = NULL;
+			nf = 0;
 		} else {
-			for (p = q->front; p->next != NULL && xx != 1; p = p->next) {
-				if (p == q->front && searchfn(p->e, skeyp)) {
-					temp1 = p;
-					temp2 = p->e;
+			if (q->front->next == NULL) {
+				if (searchfn(q->front->e, skeyp)) {
+					temp1 = q->front;
+					temp2 = q->front->e;
 					
-					q->front = q->front->next;
+					q->front = NULL;
+					q->back = NULL;
 					
 					nf = 0;
-					xx = 1;
 				}
-				
-				if (searchfn(p->next->e, skeyp)) {
-					temp1 = p->next;
-					temp2 = p->next->e;
-					
-					if (p->next == q->back) {
-						p->next = NULL;
-						q->back = p;
-					} else {
-						p->next = p->next->next;
+			} else {
+				for (p = q->front; p->next != NULL && xx != 1; p = p->next) {
+					if (p == q->front && searchfn(p->e, skeyp)) {
+						temp1 = p;
+						temp2 = p->e;
+						
+						q->front = q->front->next;
+						
+						nf = 0;
+						xx = 1;
 					}
-
-					nf = 0;
-					xx = 1;
+					
+					if (searchfn(p->next->e, skeyp)) {
+						temp1 = p->next;
+						temp2 = p->next->e;
+						
+						if (p->next == q->back) {
+							yy = 1;
+						} else {
+							p->next = p->next->next;
+						}
+						
+						nf = 0;
+						xx = 1;
+					}
 				}
 			}
 		}
@@ -208,7 +215,13 @@ void* qremove(queue_t *qp,
 	}
 
 	if (temp1 != NULL) {
+		temp1->next = NULL;
 		free(temp1);
+		temp1 = NULL;
+	}
+
+	if (yy == 1) {
+		q->back = NULL;
 	}
 
 	return temp2;
@@ -230,7 +243,7 @@ void qconcat(queue_t *qp1, queue_t *qp2) {
 				q1->back->next = q2->front;
 				q1->back = q2->back;
 			}
-			
+
 			free(q2);
 			q2 = NULL;
 		}
