@@ -156,13 +156,14 @@ void* qremove(queue_t *qp,
 	pivot_t *p = NULL, *temp1 = NULL;
 	void *temp2 = NULL;
 	int xx = 0, yy = 0, nf = 1;
+	guide_t *q = NULL;
 	
 	if (qp == NULL) {
 		printf("Queue is empty.\n");
 		temp2 = NULL;
 		nf = 0;
 	} else {
-		guide_t *q = (guide_t *)qp;
+		q = (guide_t *)qp;
 		
 		if (q == NULL || q->front == NULL || q->back == NULL) {
 			printf("Queue is empty.\n");
