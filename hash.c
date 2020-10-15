@@ -1,8 +1,16 @@
 /* 
  * hash.c -- implements a generic hash table as an indexed set of queues.
- *
+ * Author: Ye Zhang
+ * Created: Oct9 2020
+ * 
  */
 #include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "hash.h"
+#include "queue.h"
 
 /* 
  * SuperFastHash() -- produces a number between 0 and the tablesize-1.
@@ -59,23 +67,28 @@ static uint32_t SuperFastHash (const char *data,int len,uint32_t tablesize) {
 typedef struct hash_t{
 	int size;     //size of table
 	queue_t** array;   //pointer to an array that contains pointers to queues
-}hash_t
+}hash_t;
 
 hashtable_t *hopen(uint32_t hsize){
 	hash_t* ht;
 
-	ht = (hash_t*)malloc(sizeof(hash_t));
-	if ( ht == NULL ){
-		printf("memory allocation failed or hsize is zero");
+	if (hsize == 0){
+		printf("hsize can't be 0, hopen failed\n");
+		return NULL;
 	}
 
-	ht->array = (queue_t*)malloc(hsize * sizeof(queue_t*));
+	ht = (hash_t*)malloc(sizeof(hash_t));
+	if ( ht == NULL ){
+		printf("memory allocation failed or hsize is zeron\n");
+	}
+
+	ht->array = malloc(hsize * sizeof(queue_t*));
 	if ( ht->array == NULL ){
-		printf("memory allocation failed for queue");
+		printf("memory allocation failed for queue\n");
 	}
 	
 	ht->size = hsize;
-	for (int i = 0; i<hsize, i++){
+	for (int i = 0; i<hsize; i++){
 		ht->array[i] = qopen();
 	}
 	
@@ -83,37 +96,64 @@ hashtable_t *hopen(uint32_t hsize){
 }
 
 void hclose(hashtable_t *htp){
-	hash_t* ht = (hash_t*)htp
-	for (int i = 0; i < ht->size; i++){
-		qclose(ht->array[i]);
+	hash_t* ht = (hash_t*)htp;
+	if (ht == NULL){
+		printf("hashtable does not exist\n");
+	}else{
+		for (int i = 0; i < ht->size; i++){
+			qclose(ht->array[i]);
+		}
+		free(ht->array);
+		free(ht);	
 	}
-	free(ht->array);
-	free(ht);	
 }
 
 int32_t hput(hashtable_t *htp, void *ep, const char *key, int keylen){
 	hash_t* ht = (hash_t*)htp;
+
+	if (ht == NULL){
+		printf("hashtable does not exist\n");
+		return 1;
+	}
+
 	uint32_t index = SuperFastHash(key,keylen,ht->size);
 
 	if (qput(ht->array[index],ep)== 0){
-		return 0;
+			return 0;
 	}else{
-		return 1;
+			return 1;
 	}
 	
 }
 
 void happly(hashtable_t *htp, void (*fn)(void* ep)){
 	hash_t* ht = (hash_t*)htp;
-	for (int i=0; i<ht->size; i++){
-		qapply(ht->array[i],fn);
+
+	if (ht == NULL){
+		printf("hashtable does not exist\n");
+	}else{
+		for (int i=0; i<ht->size; i++){
+			qapply(ht->array[i],fn);
+		}
+	}
 }
 
 void *hsearch(hashtable_t *htp, bool (*searchfn)(void* elementp, const void* searchkeyp),
 							const char *key,
 							int32_t keylen){
 	hash_t* ht = (hash_t*)htp;
- 	uint32_t index = SuperFastHash(key,keylen,ht->size);
+	if (ht == NULL){
+		printf("hashtable does not exist\n");
+		return NULL;
+	}
+
+	uint32_t index = SuperFastHash(key,keylen,ht->size);
+
+	if(ht->array[index]==NULL){
+		printf("Element not found\n");
+		return NULL;
+	}
+	
 	void* result = qsearch(ht->array[index],searchfn,(void*)key);
 	return result;
 }
@@ -123,6 +163,22 @@ void *hremove(hashtable_t *htp,
 							const char *key,
 							int32_t keylen){
 	hash_t* ht = (hash_t*)htp;
+	
+	if (ht == NULL){
+		printf("hashtable does not exist\n");
+		return NULL;
+	}
+
 	uint32_t index = SuperFastHash(key,keylen,ht->size);
-	void* result = qremove(ht->array[index],searchfn,(void*)key);
+
+	if(ht->array[index] == NULL){
+		printf("Element not found\n");
+		return NULL;
+	}
+
+	//printf("%p\n", (void *) ht->array[index]);
+
+	void* result = qremove(ht->array[index],searchfn,key);
+	return result;
+	
 }
